@@ -1,4 +1,4 @@
-# 🦋 CASCADING FAILURES: THE BUTTERFLY EFFECT
+# CASCADING FAILURES: THE BUTTERFLY EFFECT
 ### Multi-Domain Urban Resilience Simulator & Capital Allocation Decision Engine
 
 > **Built for Manipal Hackathon 2026 — Theme: "The Butterfly Effect"**  
@@ -10,7 +10,7 @@
 
 ---
 
-## 📌 Executive Summary
+## Executive Summary
 
 Modern cities are deeply interconnected networks of networks. A minor, localized event—a tripped transmission breaker or an emergency bridge closure—rarely stays contained. Instead, it triggers a **cascading domino effect**:
 
@@ -20,13 +20,13 @@ $$\text{Power Grid Failure} \longrightarrow \text{Traffic Signals Dark} \longrig
 
 ---
 
-## 🌟 Key Features
+## Key Features
 
 ### 1. Multi-Domain Infrastructure Graph (`Metropolis-7`)
 - **Three Core Coupled Domains**:
-  - ⚡ **Electricity Grid**: 4 primary substations, 6 high-voltage distribution hubs, and transmission interconnects.
-  - 🛣️ **Transportation**: 56 surface intersections, arterial avenues, and 3 vital river bridges.
-  - 🏥 **Healthcare & Emergency**: 3 major trauma centers (e.g. *Metropolis General*), 4 acute clinics, and 11 priority ambulance express corridors.
+  - **Electricity Grid**: 4 primary substations, 6 high-voltage distribution hubs, and transmission interconnects.
+  - **Transportation**: 56 surface intersections, arterial avenues, and 3 vital river bridges.
+  - **Healthcare & Emergency**: 3 major trauma centers (e.g. *Metropolis General*), 4 acute clinics, and 11 priority ambulance express corridors.
 - **Cross-Domain Dependency Edges**: Realistically models physical dependencies:
   - Substations power traffic signal telemetry (power loss $\rightarrow$ 50% vehicular capacity drop).
   - Substations feed hospital life-support systems (loss $\rightarrow$ capacity drops to 45%).
@@ -65,7 +65,7 @@ $$\text{Power Grid Failure} \longrightarrow \text{Traffic Signals Dark} \longrig
 
 ---
 
-## 🚀 Quickstart (Zero Installation Required)
+## Quickstart (Zero Installation Required)
 
 The entire project is built with **Pure Python 3 Standard Library** and modern browser standards. No `npm install`, no `pip install`, no API keys required!
 
@@ -82,7 +82,7 @@ python3 tests/test_cascade.py
 
 ---
 
-## 📂 Project Architecture
+## Project Architecture
 
 ```
 Dis/
@@ -104,15 +104,3 @@ Dis/
 ├── start.py                 # One-click launcher
 └── README.md                # Project documentation
 ```
-
----
-
-## 🏆 Hackathon Alignment (Manipal 2026)
-
-| Judging Criteria | Our Implementation |
-|---|---|
-| **Innovation Beyond Requirements** | Built an end-to-end **Decision-Making Engine** (not just a viewer) that evaluates capital ROI by simulating before/after reinforcement deltas. |
-| **Feasibility & Practicality** | Pure Python standard library with zero external dependencies; runs deterministically on any machine without internet access or build tools. |
-| **Theme: "The Butterfly Effect"** | Demonstrates how a single tripped transformer causes ripple effects across traffic lights and ambulance corridors, isolating an entire hospital. |
-| **Monetisation Strategy** | Enterprise SaaS model for Municipal Disaster Management Authorities (DDMA/NDRF), infrastructure insurers, and smart city planners. |
-| **Presentation & Video Compliance** | Strictly formatted to Round 1 rules: PDF presentation template outline and a crisp 2-to-3 minute video demonstration script. |
