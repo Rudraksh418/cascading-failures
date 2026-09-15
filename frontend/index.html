@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Cascading Flows // Urban Resilience &amp; Isometric Structural Simulation</title>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..700;1,300..700&amp;family=Space+Grotesk:wght@300..700&amp;family=Shippori+Mincho:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+  <script>
+    // Apply the persisted theme before first paint so there is no light→dark flash.
+    (function () {
+      try {
+        var t = localStorage.getItem('cf-theme');
+        if (t === 'dark') {
+          document.documentElement.classList.remove('light');
+          document.documentElement.classList.add('dark');
+        }
+      } catch (e) { /* storage unavailable */ }
+    })();
+  </script>
+  <style>
+    /* ---------------------------------------------------------------
+       Theme palette. Every Tailwind color in the config below resolves
+       to one of these RGB triples, so flipping `.dark` on <html>
+       re-skins the entire dashboard without per-element dark: classes.
+       --------------------------------------------------------------- */
+    :root {
+      color-scheme: light;
+      --c-surface: 251 249 245;
+      --c-surface-dim: 242 237 228;
+      --c-surface-container: 238 233 223;
+      --c-surface-container-high: 229 223 210;
+      --c-surface-container-highest: 220 213 198;
+      --c-sand: 247 244 238;
+      --c-sand-dark: 236 230 217;
+      --c-primary: 36 54 36;
+      --c-primary-container: 61 83 61;
+      --c-on-primary: 255 255 255;
+      --c-moss: 61 106 78;
+      --c-moss-soft: 235 243 237;
+      --c-moss-dark: 43 75 55;
+      --c-terracotta: 200 90 50;
+      --c-terracotta-soft: 249 235 230;
+      --c-persimmon: 216 107 61;
+      --c-stone: 118 113 104;
+      --c-stone-light: 162 157 147;
+      --c-stone-dark: 54 51 46;
+      --c-amber-warm: 217 142 50;
+      --c-amber-soft: 251 243 231;
+      --c-water: 203 218 213;
+      --c-water-deep: 140 168 160;
+      /* Non-Tailwind accents */
+      --c-page-text: #2b2e2b;
+      --c-pattern-dot: #d8d2c4;
+      --c-slider-track: #e2ddd3;
+      --c-btn-ink: 54 51 46;      /* background of "ink" buttons (bg-stone-dark) */
+      --c-btn-ink-hover: 0 0 0;
+      --shadow-ink: 60, 64, 58;
+    }
+    html.dark {
+      color-scheme: dark;
+      --c-surface: 31 33 37;
+      --c-surface-dim: 25 27 31;
+      --c-surface-container: 42 45 50;
+      --c-surface-container-high: 52 56 62;
+      --c-surface-container-highest: 70 75 82;
+      --c-sand: 20 22 26;
+      --c-sand-dark: 28 30 35;
+      --c-primary: 214 230 214;
+      --c-primary-container: 61 83 61;
+      --c-on-primary: 255 255 255;
+      --c-moss: 84 150 108;
+      --c-moss-soft: 34 52 42;
+      --c-moss-dark: 110 178 134;
+      --c-terracotta: 232 122 82;
+      --c-terracotta-soft: 66 40 32;
+      --c-persimmon: 244 140 96;
+      --c-stone: 160 154 144;
+      --c-stone-light: 118 113 105;
+      --c-stone-dark: 232 228 220;
+      --c-amber-warm: 232 166 74;
+      --c-amber-soft: 62 48 30;
+      --c-water: 58 78 84;
+      --c-water-deep: 96 128 122;
+      --c-page-text: #e8e4dc;
+      --c-pattern-dot: #262930;
+      --c-slider-track: #3a3e45;
+      --c-btn-ink: 82 86 94;
+      --c-btn-ink-hover: 104 108 118;
+      --shadow-ink: 0, 0, 0;
+    }
+
+    @layer base {
+      html, body {
+        margin: 0;
+        padding: 0;
+        background-color: rgb(var(--c-sand));
+        color: var(--c-page-text);
+      }
+      body { overscroll-behavior: none; }
+    }
+    ::-webkit-scrollbar { display: none; }
+
+    /* Subtle raked sand texture & organic dot grid */
+    .sand-pattern {
+      background-color: rgb(var(--c-sand));
+      background-image: radial-gradient(var(--c-pattern-dot) 0.75px, transparent 0.75px), radial-gradient(var(--c-pattern-dot) 0.75px, rgb(var(--c-sand)) 0.75px);
+      background-size: 24px 24px;
+      background-position: 0 0, 12px 12px;
+    }
+
+    /* "Ink" buttons: bg-stone-dark is a near-black background in light mode but stone-dark
+       becomes the primary *text* color in dark mode, so give the button its own surface. */
+    .bg-stone-dark { background-color: rgb(var(--c-btn-ink)) !important; }
+    .hover\:bg-black:hover { background-color: rgb(var(--c-btn-ink-hover)) !important; }
+
+    .shadow-soft {
+      box-shadow: 0 4px 20px -2px rgba(var(--shadow-ink), 0.06), 0 1px 4px -1px rgba(var(--shadow-ink), 0.04);
+    }
+    .shadow-float {
+      box-shadow: 0 16px 36px -8px rgba(var(--shadow-ink), 0.12), 0 4px 12px -2px rgba(var(--shadow-ink), 0.05);
+    }
+    .inner-well {
+      box-shadow: inset 0 2px 4px 0 rgba(var(--shadow-ink), 0.05);
+    }
+    html.dark .shadow-soft { box-shadow: 0 4px 20px -2px rgba(0,0,0,0.35), 0 1px 4px -1px rgba(0,0,0,0.3); }
+    html.dark .shadow-float { box-shadow: 0 16px 36px -8px rgba(0,0,0,0.5), 0 4px 12px -2px rgba(0,0,0,0.35); }
+    html.dark .inner-well { box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.35); }
+
+    /* Custom range slider styling for tactile wooden/ceramic feel */
+    input[type=range] {
+      -webkit-appearance: none;
+      background: transparent;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 18px;
+      width: 18px;
+      border-radius: 9999px;
+      background: #c85a32;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 6px rgba(200, 90, 50, 0.35);
+      cursor: pointer;
+      margin-top: -6px;
+      transition: transform 0.15s ease;
+    }
+    input[type=range]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 6px;
+      cursor: pointer;
+      background: var(--c-slider-track);
+      border-radius: 9999px;
+    }
+    
+    @keyframes gentleFloat {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-4px); }
+    }
+    .animate-float {
+      animation: gentleFloat 6s ease-in-out infinite;
+    }
+
+    @keyframes ripplePulse {
+      0% { r: 18; opacity: 0.8; }
+      100% { r: 42; opacity: 0; }
+    }
+    .water-ripple {
+      animation: ripplePulse 3.2s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+    }
+  </style>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface": "rgb(var(--c-surface) / <alpha-value>)",
+            "surface-dim": "rgb(var(--c-surface-dim) / <alpha-value>)",
+            "surface-container": "rgb(var(--c-surface-container) / <alpha-value>)",
+            "surface-container-high": "rgb(var(--c-surface-container-high) / <alpha-value>)",
+            "surface-container-highest": "rgb(var(--c-surface-container-highest) / <alpha-value>)",
+            "sand": "rgb(var(--c-sand) / <alpha-value>)",
+            "sand-dark": "rgb(var(--c-sand-dark) / <alpha-value>)",
+            "primary": "rgb(var(--c-primary) / <alpha-value>)",
+            "primary-container": "rgb(var(--c-primary-container) / <alpha-value>)",
+            "on-primary": "rgb(var(--c-on-primary) / <alpha-value>)",
+            "moss": "rgb(var(--c-moss) / <alpha-value>)",
+            "moss-soft": "rgb(var(--c-moss-soft) / <alpha-value>)",
+            "moss-dark": "rgb(var(--c-moss-dark) / <alpha-value>)",
+            "terracotta": "rgb(var(--c-terracotta) / <alpha-value>)",
+            "terracotta-soft": "rgb(var(--c-terracotta-soft) / <alpha-value>)",
+            "persimmon": "rgb(var(--c-persimmon) / <alpha-value>)",
+            "stone": "rgb(var(--c-stone) / <alpha-value>)",
+            "stone-light": "rgb(var(--c-stone-light) / <alpha-value>)",
+            "stone-dark": "rgb(var(--c-stone-dark) / <alpha-value>)",
+            "amber-warm": "rgb(var(--c-amber-warm) / <alpha-value>)",
+            "amber-soft": "rgb(var(--c-amber-soft) / <alpha-value>)",
+            "water": "rgb(var(--c-water) / <alpha-value>)",
+            "water-deep": "rgb(var(--c-water-deep) / <alpha-value>)"
+          },
+          fontFamily: {
+            "serif": ["Shippori Mincho", "serif"],
+            "sans": ["Plus Jakarta Sans", "sans-serif"],
+            "mono": ["JetBrains Mono", "monospace"],
+            "display": ["Space Grotesk", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="font-sans text-stone-dark select-none bg-sand sand-pattern min-h-screen flex flex-col">
+  <!-- TOP NAVIGATION HEADER -->
+  <header class="sticky top-0 w-full z-50 bg-surface/90 backdrop-blur-md border-b border-surface-container-highest/70 shadow-soft" id="appHeader">
+    <div class="max-w-[1760px] mx-auto px-4 sm:px-6 h-18 flex items-center justify-between">
+      <!-- Logo & Scenario Title -->
+      <div class="flex items-center gap-4 py-2">
+        <div class="w-10 h-10 rounded-2xl bg-surface-container flex items-center justify-center border border-surface-container-highest shadow-sm">
+          <!-- Stylized Isometric Truss Icon -->
+          <svg class="w-5 h-5 text-moss" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+            <polygon points="12 2 2 8.5 12 15 22 8.5 12 2" stroke-linecap="round" stroke-linejoin="round"></polygon>
+            <polyline points="2 15.5 12 22 22 15.5" stroke-linecap="round" stroke-linejoin="round"></polyline>
+            <line x1="12" x2="12" y1="2" y2="22"></line>
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-serif font-bold text-lg tracking-tight text-primary">Cascading Flows</span>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-surface-container text-stone font-semibold">POLY-SIM v3.8</span>
+          </div>
+          <p class="text-xs text-stone font-medium">Resilient Topology &amp; Isometric Stress Simulator</p>
+        </div>
+      </div>
+      <!-- Center Status Badge -->
+      <div class="hidden xl:flex items-center gap-3 bg-surface-dim/80 px-3.5 py-1.5 rounded-full border border-surface-container-highest/60 text-xs">
+        <div class="flex items-center gap-1.5 font-medium text-stone-dark">
+          <span class="w-2 h-2 rounded-full bg-moss" id="headerStatusDot"></span>
+          <span id="headerStatusText">All Systems Nominal</span>
+        </div>
+        <span class="text-surface-container-highest">|</span>
+        <span class="text-stone">Active Strain:</span>
+        <span class="font-mono font-bold text-moss bg-moss-soft px-2 py-0.5 rounded-full text-[11px]" id="headerStrainBadge">0% [NOMINAL]</span>
+        <span class="text-surface-container-highest">|</span>
+        <span class="text-moss font-mono text-[11px]" id="headerSolverText">VERLET-4 SOLVER: CALM</span>
+      </div>
+      <!-- Navigation Tabs & Primary Action -->
+      <div class="flex items-center gap-3">
+        <nav class="hidden md:flex items-center p-1 bg-surface-dim rounded-2xl border border-surface-container-highest/50">
+          <button class="px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-surface text-stone-dark shadow-soft" id="navTabDiorama">Diorama Canvas</button>
+        </nav>
+        <button class="px-4 py-2 rounded-2xl bg-terracotta hover:bg-persimmon text-white font-medium text-xs tracking-wide shadow-md shadow-terracotta/20 flex items-center gap-2 transition-all" id="headerSimulateBtn" type="button">
+          <span class="material-symbols-outlined text-[16px]">play_arrow</span>
+          <span>Simulate Flow</span>
+        </button>
+        <button class="w-9 h-9 rounded-2xl bg-surface-dim hover:bg-surface-container border border-surface-container-highest/60 flex items-center justify-center text-stone transition-colors" title="Reset View / Rebalance" id="btnResetTop" type="button">
+          <span class="material-symbols-outlined text-[18px]">restart_alt</span>
+        </button>
+        <button class="w-9 h-9 rounded-2xl bg-surface-dim hover:bg-surface-container border border-surface-container-highest/60 flex items-center justify-center text-stone transition-colors" title="Toggle dark mode" id="btnThemeToggle" type="button" aria-label="Toggle dark mode">
+          <span class="material-symbols-outlined text-[18px]" id="themeToggleIcon">dark_mode</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- SUB-BAR / SCENARIO INQUIRY SEARCH -->
+  <div class="w-full max-w-[1760px] mx-auto px-4 sm:px-6 pt-4 pb-2">
+    <div class="bg-surface rounded-3xl p-2.5 sm:p-3 shadow-soft border border-surface-container-highest/60 flex flex-col md:flex-row items-stretch md:items-center gap-3">
+      <!-- Natural Language Prompt -->
+      <div class="flex items-center gap-2.5 px-3 py-1 flex-1 bg-surface-dim rounded-2xl border border-surface-container-highest/40 focus-within:border-moss/70 focus-within:bg-surface transition-all">
+        <span class="material-symbols-outlined text-moss text-[20px]">psychology_alt</span>
+        <input class="w-full bg-transparent border-none text-stone-dark placeholder:text-stone-light text-xs sm:text-sm font-sans focus:outline-none" id="simQueryInput" placeholder="Ask anything: e.g. &quot;What if the Central Bridge closes for 8 hours during rush hour?&quot;" type="text" value=""/>
+        <button class="text-stone hover:text-stone-dark p-1" id="btnClearPrompt" title="Clear inquiry" type="button">
+          <span class="material-symbols-outlined text-[16px]">close</span>
+        </button>
+        <button class="px-3 py-1.5 rounded-xl bg-moss hover:bg-moss-dark text-white font-medium text-xs whitespace-nowrap flex items-center gap-1.5 transition-colors" id="btnRunHypothesis" title="Simulate this hypothesis" type="button">
+          <span class="material-symbols-outlined text-[15px]">auto_awesome</span>
+          <span>Simulate</span>
+        </button>
+      </div>
+      <!-- Preset Scenarios Pills -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 shrink-0">
+        <span class="text-[11px] font-serif text-stone pl-1 shrink-0">Presets:</span>
+        <button class="preset-pill px-3 py-1.5 rounded-xl bg-terracotta-soft hover:bg-terracotta/20 text-terracotta font-medium text-xs whitespace-nowrap transition-colors flex items-center gap-1.5 border border-terracotta/30" data-preset="bridge" type="button">
+          <span class="w-1.5 h-1.5 rounded-full bg-terracotta"></span> Central Bridge
+        </button>
+        <button class="preset-pill px-3 py-1.5 rounded-xl bg-surface-dim hover:bg-surface-container text-stone-dark font-medium text-xs whitespace-nowrap transition-colors flex items-center gap-1.5 border border-surface-container-highest/50" data-preset="substation" type="button">
+          <span class="w-1.5 h-1.5 rounded-full bg-amber-warm"></span> Downtown Power Station
+        </button>
+        <button class="preset-pill px-3 py-1.5 rounded-xl bg-surface-dim hover:bg-surface-container text-stone-dark font-medium text-xs whitespace-nowrap transition-colors flex items-center gap-1.5 border border-surface-container-highest/50" data-preset="hospital" type="button">
+          <span class="w-1.5 h-1.5 rounded-full bg-moss"></span> Central Hospital
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN WORKSPACE: ISOMETRIC DIORAMA SIMULATION MAP (LEFT 68%) + TELEMETRY & RESILIENCE (32%) -->
+  <main class="w-full max-w-[1760px] mx-auto px-4 sm:px-6 py-3 flex-1 grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
+    <!-- LEFT 8 COLS: 3D ISOMETRIC POLY BRIDGE DIORAMA CANVAS & TACTILE POTENTIOMETERS -->
+    <div class="xl:col-span-8 flex flex-col gap-4">
+      <!-- ISOMETRIC 3D SIMULATION DIORAMA CONTAINER -->
+      <div class="relative w-full bg-surface rounded-3xl overflow-hidden shadow-float border border-surface-container-highest/80 flex flex-col" style="height: 660px;">
+        <!-- Canvas Controls Top Overlay Bar -->
+        <div class="absolute top-4 left-4 right-4 z-30 flex flex-wrap items-center justify-between gap-2 pointer-events-none" id="canvasControlBar">
+          <!-- View Mode & Domain Layer Filters -->
+          <div class="pointer-events-auto flex items-center gap-1.5 bg-surface/90 backdrop-blur-md p-1.5 rounded-2xl shadow-soft border border-surface-container-highest/80">
+            <!-- Mode Switcher -->
+            <button class="px-2.5 py-1 rounded-xl bg-stone-dark text-white text-xs font-medium flex items-center gap-1.5 transition-all shadow-sm" id="btnView3D" type="button" title="Interactive 3D Poly Bridge Simulation">
+              <span class="material-symbols-outlined text-[15px]">view_in_ar</span>
+              <span>3D Poly Bridge</span>
+            </button>
+            <button class="px-2.5 py-1 rounded-xl bg-surface-dim hover:bg-surface-container text-stone-dark text-xs font-medium flex items-center gap-1.5 transition-all" id="btnViewSVG" type="button" title="Isometric Schematic SVG">
+              <span class="material-symbols-outlined text-[15px]">layers</span>
+              <span>Isometric SVG</span>
+            </button>
+            <button class="px-2.5 py-1 rounded-xl bg-surface-dim hover:bg-surface-container text-stone-dark text-xs font-medium flex items-center gap-1.5 transition-all" id="btnViewMatrix" type="button" title="Topological Interdependency Matrix">
+              <span class="material-symbols-outlined text-[15px]">grid_4x4</span>
+              <span>Matrix</span>
+            </button>
+
+            <span class="w-px h-3.5 bg-surface-container-highest mx-0.5"></span>
+
+            <!-- Layer toggles -->
+            <button class="px-2 py-1 rounded-xl bg-surface-dim text-moss-dark text-xs font-medium flex items-center gap-1 transition-all border border-moss/30" id="toggleRoads" type="button">
+              <span class="w-2 h-2 rounded-full bg-moss"></span>
+              <span class="hidden md:inline">Roads [T]</span>
+            </button>
+            <button class="px-2 py-1 rounded-xl bg-surface-dim text-amber-warm text-xs font-medium flex items-center gap-1 transition-all border border-amber-warm/30" id="togglePower" type="button">
+              <span class="w-2 h-2 rounded-full bg-amber-warm"></span>
+              <span class="hidden md:inline">Grid [E]</span>
+            </button>
+            <button class="px-2 py-1 rounded-xl bg-surface-dim text-terracotta text-xs font-medium flex items-center gap-1 transition-all border border-terracotta/30" id="toggleMed" type="button">
+              <span class="w-2 h-2 rounded-full bg-terracotta"></span>
+              <span class="hidden md:inline">Trauma [H]</span>
+            </button>
+          </div>
+
+          <!-- Diorama Camera / Perspective Controls -->
+          <div class="pointer-events-auto flex items-center gap-1.5 bg-surface/90 backdrop-blur-md p-1.5 rounded-2xl shadow-soft border border-surface-container-highest/80">
+            <!-- Quick Focus Hotkeys -->
+            <button class="px-2 py-1 rounded-xl hover:bg-surface-dim text-stone-dark text-xs font-medium flex items-center gap-1 transition-colors" id="btnFocusBridge" title="Focus Central Bridge" type="button">
+              <span>🌉 Bridge</span>
+            </button>
+            <button class="px-2 py-1 rounded-xl hover:bg-surface-dim text-stone-dark text-xs font-medium flex items-center gap-1 transition-colors" id="btnFocusHospital" title="Focus Central Hospital" type="button">
+              <span>🏥 Hospital</span>
+            </button>
+            <button class="px-2 py-1 rounded-xl hover:bg-surface-dim text-stone-dark text-xs font-medium flex items-center gap-1 transition-colors" id="btnFocusSubstation" title="Focus Downtown Power Station" type="button">
+              <span>⚡ Power</span>
+            </button>
+
+            <span class="w-px h-3.5 bg-surface-container-highest mx-0.5"></span>
+
+            <!-- Perspective Controls -->
+            <button class="px-2 py-1 rounded-xl bg-surface-container text-stone-dark hover:text-stone-dark text-xs font-medium flex items-center gap-1 transition-colors" id="btnCamOrbit" title="3D Free Orbit" type="button">
+              <span class="material-symbols-outlined text-[15px]">3d_rotation</span>
+              <span class="hidden lg:inline">Orbit</span>
+            </button>
+            <button class="px-2 py-1 rounded-xl hover:bg-surface-dim text-stone hover:text-stone-dark text-xs font-medium flex items-center gap-1 transition-colors" id="btnRecenter" title="Isometric 30°" type="button">
+              <span class="material-symbols-outlined text-[15px]">view_in_ar</span>
+              <span class="hidden lg:inline">Iso 30°</span>
+            </button>
+            <button class="px-2 py-1 rounded-xl hover:bg-surface-dim text-stone hover:text-stone-dark text-xs font-medium flex items-center gap-1 transition-colors" id="btnCamTopDown" title="Top-down Orthographic" type="button">
+              <span class="material-symbols-outlined text-[15px]">grid_view</span>
+              <span class="hidden lg:inline">Top-Down</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- THE 3D ISOMETRIC POLY BRIDGE DIORAMA CANVAS & SVG -->
+        <div class="w-full h-full relative cursor-grab active:cursor-grabbing select-none" id="dioramaContainer">
+          <!-- 3D WebGL Poly Bridge Canvas -->
+          <canvas id="polybridge3dCanvas" class="w-full h-full absolute inset-0 block"></canvas>
+
+          <!-- SVG Diorama (Toggleable) -->
+          <svg class="w-full h-full absolute inset-0 hidden" id="dioramaSvg" preserveaspectratio="xMidYMid meet" viewbox="0 0 1000 660">
+            <defs>
+              <!-- Soft Shadows for 3D Isometric Elements -->
+              <filter height="140%" id="softDioramaShadow" width="140%" x="-20%" y="-20%">
+                <fedropshadow dx="0" dy="18" flood-color="#5a5245" flood-opacity="0.14" stddeviation="14"></fedropshadow>
+              </filter>
+              <filter height="160%" id="elementGlow" width="160%" x="-30%" y="-30%">
+                <fedropshadow dx="0" dy="4" flood-color="#c85a32" flood-opacity="0.3" stddeviation="6"></fedropshadow>
+              </filter>
+              <filter height="140%" id="gentleGlow" width="140%" x="-20%" y="-20%">
+                <fedropshadow dx="0" dy="2" flood-color="#3d6a4e" flood-opacity="0.25" stddeviation="3"></fedropshadow>
+              </filter>
+              <!-- Isometric Gradients for Natural Earth & Water Plinth -->
+              <lineargradient id="plinthTop" x1="0%" x2="100%" y1="0%" y2="100%">
+                <stop offset="0%" stop-color="#fdfbf7"></stop>
+                <stop offset="100%" stop-color="#f1ebe0"></stop>
+              </lineargradient>
+              <lineargradient id="plinthSideLeft" x1="0%" x2="0%" y1="0%" y2="100%">
+                <stop offset="0%" stop-color="#ded7c9"></stop>
+                <stop offset="100%" stop-color="#c5beaE"></stop>
+              </lineargradient>
+              <lineargradient id="plinthSideRight" x1="0%" x2="0%" y1="0%" y2="100%">
+                <stop offset="0%" stop-color="#cdc5b6"></stop>
+                <stop offset="100%" stop-color="#b6ad9d"></stop>
+              </lineargradient>
+              <!-- River & Pond Gradient -->
+              <lineargradient id="riverGrad" x1="0%" x2="100%" y1="0%" y2="100%">
+                <stop offset="0%" stop-color="#d4e4e0"></stop>
+                <stop offset="50%" stop-color="#c3dad4"></stop>
+                <stop offset="100%" stop-color="#b4cfc8"></stop>
+              </lineargradient>
+              <!-- Wood Deck Pattern for Poly Bridge Truss -->
+              <lineargradient id="woodPlank" x1="0%" x2="100%" y1="0%" y2="0%">
+                <stop offset="0%" stop-color="#cbb592"></stop>
+                <stop offset="100%" stop-color="#bda37d"></stop>
+              </lineargradient>
+              <!-- Hospital Clean Facade Gradients -->
+              <lineargradient id="hospitalRoof" x1="0%" x2="100%" y1="0%" y2="100%">
+                <stop offset="0%" stop-color="#ffffff"></stop>
+                <stop offset="100%" stop-color="#f2efe9"></stop>
+              </lineargradient>
+              <lineargradient id="hospitalWallL" x1="0%" x2="0%" y1="0%" y2="100%">
+                <stop offset="0%" stop-color="#eae6dd"></stop>
+                <stop offset="100%" stop-color="#d8d3c7"></stop>
+              </lineargradient>
+              <lineargradient id="hospitalWallR" x1="0%" x2="0%" y1="0%" y2="100%">
+                <stop offset="0%" stop-color="#dfd9ce"></stop>
+                <stop offset="100%" stop-color="#cbbfb0"></stop>
+              </lineargradient>
+            </defs>
+            <!-- 1. BASE ISOMETRIC FLOATING DIORAMA PLINTH -->
+            <g filter="url(#softDioramaShadow)" id="plinthGroup" transform="translate(500, 310)">
+              <!-- Lower Plinth 3D Thickness (Stone Cut Foundation) -->
+              <polygon fill="url(#plinthSideLeft)" points="-430,70 0,270 0,335 -430,135"></polygon>
+              <polygon fill="url(#plinthSideRight)" points="0,270 430,70 430,135 0,335"></polygon>
+              <!-- Top Surface Diamond (The Landscape Ground) -->
+              <polygon fill="url(#plinthTop)" points="0,-150 430,70 0,270 -430,70" stroke="#ded7c9" stroke-width="1.5"></polygon>
+              <!-- Raked Sand Curves (Concentric Ripples) -->
+              <g fill="none" opacity="0.8" stroke="#e2dcd0" stroke-width="1.2">
+                <path d="M -320,50 Q -240,-10 -150,20 Q -60,60 0,40"></path>
+                <path d="M -300,65 Q -225,5 -140,35 Q -55,75 5,55"></path>
+                <path d="M -280,80 Q -210,20 -130,50 Q -50,90 10,70"></path>
+                <path d="M 120,-30 Q 210,10 320,-10"></path>
+                <path d="M 140,-15 Q 225,25 335,5"></path>
+              </g>
+              <!-- Water Canal / River Cutting Through the Diorama -->
+              <path d="M -430,70 L -220,170 Q -60,110 50,160 L 220,75 L 140,35 Q -30,60 -180,105 L -360,35 Z" fill="url(#riverGrad)" opacity="0.9"></path>
+              <!-- Water Ripple Rings around bridge foundations -->
+              <ellipse class="water-ripple" cx="-130" cy="115" fill="none" opacity="0.7" rx="35" ry="16" stroke="#e8f3f0" stroke-width="1.5"></ellipse>
+              <ellipse class="water-ripple" cx="60" cy="140" fill="none" opacity="0.6" rx="30" ry="14" stroke="#e8f3f0" stroke-width="1.2" style="animation-delay: 1.2s;"></ellipse>
+              <!-- River Rocks / Stepping Stones -->
+              <ellipse cx="-80" cy="120" fill="#8e897e" rx="10" ry="5"></ellipse>
+              <ellipse cx="-80" cy="118" fill="#a49e93" rx="8" ry="4"></ellipse>
+              <ellipse cx="-60" cy="130" fill="#8e897e" rx="7" ry="3.5"></ellipse>
+            </g>
+
+            <!-- 2. ISOMETRIC INFRASTRUCTURE & BUILDINGS (POLY BRIDGE STYLE) -->
+            <g id="dioramaMainGroup" transform="translate(500, 310)">
+              <!-- LAYER: ROADS & ELEVATED TRUSS BRIDGES (POLY BRIDGE 3) -->
+              <g id="layerRoadsGroup">
+                <!-- Secondary Elevated Highway Truss Ramp (T-03 to T-02) -->
+                <polygon fill="#cfc8bb" points="-260,20 -252,16 -252,60 -260,64"></polygon>
+                <polygon fill="#b9b2a5" points="-252,16 -244,20 -244,64 -252,60"></polygon>
+                <polygon fill="#cfc8bb" points="-160,-30 -152,-34 -152,10 -160,14"></polygon>
+                <!-- Roadway Surface Ribbon -->
+                <polygon fill="#757069" points="-340,60 -120,-50 -95,-38 -315,72"></polygon>
+                <polygon fill="#58544e" points="-340,60 -315,72 -315,76 -340,64"></polygon>
+                <!-- Road Markings -->
+                <line opacity="0.7" stroke="#fff" stroke-dasharray="8,8" stroke-width="1.5" x1="-325" x2="-105" y1="65" y2="-45"></line>
+
+                <!-- MAIN FOCAL POINT: POLY BRIDGE 3 ISOMETRIC TRUSS HARBOR SUSPENSION BRIDGE (#T-01) -->
+                <g class="cursor-pointer group" id="bridgeTrussDiorama" onclick="window.selectNode('T-01')">
+                  <!-- Shadow beneath the bridge -->
+                  <polygon fill="#4a5550" opacity="0.25" points="-160,135 110,180 130,170 -140,125"></polygon>
+                  <!-- Bridge Support Concrete Abutments (Left Bank) -->
+                  <polygon fill="#cfc8bb" points="-170,85 -140,70 -140,110 -170,125"></polygon>
+                  <polygon fill="#b8b1a4" points="-140,70 -120,80 -120,120 -140,110"></polygon>
+                  <!-- Bridge Support Concrete Abutments (Right Bank) -->
+                  <polygon fill="#cfc8bb" points="70,140 100,125 100,165 70,180"></polygon>
+                  <polygon fill="#b8b1a4" points="100,125 120,135 120,175 100,165"></polygon>
+                  <!-- Wooden Road Deck Planks -->
+                  <polygon fill="url(#woodPlank)" points="-155,80 90,130 95,142 -150,92" stroke="#8e7655" stroke-width="1"></polygon>
+                  <polygon fill="#786043" points="-150,92 95,142 95,148 -150,98"></polygon>
+
+                  <!-- Deck Truss Stress Joint Nodes (Pins) -->
+                  <circle cx="-150" cy="86" fill="#d86b3d" r="4.5" stroke="#fff" stroke-width="1.2"></circle>
+                  <circle cx="-100" cy="96" fill="#c85a32" r="4.5" stroke="#fff" stroke-width="1.2"></circle>
+                  <circle cx="-50" cy="106" fill="#e03e2d" r="4.5" stroke="#fff" stroke-width="1.5"></circle>
+                  <circle cx="0" cy="116" fill="#e03e2d" r="4.5" stroke="#fff" stroke-width="1.5"></circle>
+                  <circle cx="50" cy="126" fill="#c85a32" r="4.5" stroke="#fff" stroke-width="1.2"></circle>
+                  <circle cx="95" cy="136" fill="#3d6a4e" r="4.5" stroke="#fff" stroke-width="1.2"></circle>
+
+                  <!-- TOP TRUSS CHORDS & SUSPENSION CABLES (COLORED BY STRESS) -->
+                  <line id="trussChord1" stroke="#3d6a4e" stroke-linecap="round" stroke-width="3" x1="-150" x2="-100" y1="86" y2="40"></line>
+                  <line id="trussChord2" stroke="#3d6a4e" stroke-linecap="round" stroke-width="3.5" x1="-100" x2="-50" y1="40" y2="25"></line>
+                  <line id="trussChord3" stroke="#3d6a4e" stroke-dasharray="9,3" stroke-linecap="round" stroke-width="4.5" x1="-50" x2="0" y1="25" y2="28"></line>
+                  <line id="trussChord4" stroke="#3d6a4e" stroke-linecap="round" stroke-width="3.5" x1="0" x2="50" y1="28" y2="50"></line>
+                  <line id="trussChord5" stroke="#3d6a4e" stroke-linecap="round" stroke-width="3" x1="50" x2="95" y1="50" y2="136"></line>
+
+                  <!-- Vertical & Diagonal Wood Trusses -->
+                  <line stroke="#d86b3d" stroke-width="2.5" x1="-100" x2="-100" y1="96" y2="40"></line>
+                  <line stroke="#e03e2d" stroke-width="3" x1="-100" x2="-50" y1="40" y2="106"></line>
+                  <line stroke="#e03e2d" stroke-width="3.5" x1="-50" x2="-50" y1="106" y2="25"></line>
+                  <line stroke="#ba1a1a" stroke-dasharray="4,2" stroke-width="4" x1="-50" x2="0" y1="25" y2="116"></line>
+                  <line stroke="#e03e2d" stroke-width="3.5" x1="0" x2="0" y1="116" y2="28"></line>
+                  <line stroke="#d86b3d" stroke-width="2.5" x1="0" x2="50" y1="28" y2="126"></line>
+                  <line stroke="#3d6a4e" stroke-width="2.5" x1="50" x2="50" y1="126" y2="50"></line>
+
+                  <!-- Top Nodes -->
+                  <circle cx="-100" cy="40" fill="#3d6a4e" r="4" stroke="#fff" stroke-width="1.2"></circle>
+                  <circle cx="-50" cy="25" fill="#e03e2d" r="5" stroke="#fff" stroke-width="1.5"></circle>
+                  <circle cx="0" cy="28" fill="#ba1a1a" r="5" stroke="#fff" stroke-width="1.5"></circle>
+                  <circle cx="50" cy="50" fill="#d86b3d" r="4" stroke="#fff" stroke-width="1.2"></circle>
+
+                  <!-- Little Low-Poly Poly Bridge Delivery Truck Crossing the Bridge -->
+                  <g class="animate-float" transform="translate(-65, 88) scale(0.9)">
+                    <polygon fill="#2d332d" opacity="0.35" points="-8,10 16,16 28,10 4,4"></polygon>
+                    <polygon fill="#df9e38" points="0,0 16,8 16,-8 0,-16"></polygon>
+                    <polygon fill="#cb8622" points="16,8 24,4 24,-12 16,-8"></polygon>
+                    <polygon fill="#f0b656" points="0,-16 16,-8 24,-12 8,-20"></polygon>
+                    <polygon fill="#d6e8e2" points="17,-5 22,-8 22,-11 17,-8"></polygon>
+                    <polygon fill="#ede8df" points="-14,-6 0,1 0,-15 -14,-22"></polygon>
+                    <polygon fill="#f9f7f2" points="-14,-22 0,-15 12,-21 -2,-28"></polygon>
+                  </g>
+
+                  <!-- Little Red Cross Low-Poly Ambulance Rushing into Corridor -->
+                  <g transform="translate(18, 108) scale(0.85)">
+                    <polygon fill="#2d332d" opacity="0.3" points="-6,8 14,14 24,9 4,3"></polygon>
+                    <polygon fill="#ffffff" points="0,0 16,8 16,-8 0,-16"></polygon>
+                    <polygon fill="#ebe6dd" points="16,8 22,5 22,-11 16,-8"></polygon>
+                    <polygon fill="#ffffff" points="0,-16 16,-8 22,-11 6,-19"></polygon>
+                    <rect fill="#c85a32" height="2" transform="skewY(26)" width="6" x="5" y="-10"></rect>
+                    <rect fill="#c85a32" height="6" transform="skewY(26)" width="2" x="7" y="-12"></rect>
+                    <circle cx="10" cy="-14" fill="#ba1a1a" r="2.5"></circle>
+                  </g>
+
+                  <!-- Failure Stress Callout Badge -->
+                  <g transform="translate(-25, 4)">
+                    <rect fill="#ba1a1a" height="18" rx="9" width="84" x="-42" y="-18"></rect>
+                    <text fill="#ffffff" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="600" text-anchor="middle" x="0" y="-6" id="bridgeOverloadBadge">NOMINAL</text>
+                  </g>
+                </g>
+
+                <!-- Canal Viaduct Link (#T-05) on Right bank -->
+                <polygon fill="#757069" points="110,135 240,200 255,190 125,125"></polygon>
+                <polygon fill="#58544e" points="110,135 125,125 125,130 110,140"></polygon>
+                <polygon fill="#ded8cc" points="180,170 190,165 190,210 180,215"></polygon>
+                <polygon fill="#c8c1b3" points="190,165 198,170 198,215 190,210"></polygon>
+              </g>
+
+              <!-- LAYER: 3D LOW-POLY HOSPITAL COMPLEX (#H-01 SAINT JUDE) -->
+              <g class="cursor-pointer group" id="hospitalDiorama" onclick="window.selectNode('H-01')" transform="translate(190, -30)">
+                <polygon fill="#4d473d" opacity="0.2" points="-70,30 20,75 80,45 -10,0"></polygon>
+                <!-- Main Wing -->
+                <polygon fill="url(#hospitalWallL)" points="-50,10 0,35 0,-40 -50,-65" stroke="#c2bbb0" stroke-width="0.8"></polygon>
+                <polygon fill="url(#hospitalWallR)" points="0,35 60,5 60,-70 0,-40" stroke="#b8b1a4" stroke-width="0.8"></polygon>
+                <polygon fill="url(#hospitalRoof)" points="-50,-65 0,-40 60,-70 10,-95" stroke="#ded8cc" stroke-width="1"></polygon>
+                <!-- Windows grid -->
+                <line stroke="#8fa8a1" stroke-dasharray="5,4" stroke-width="3" x1="-40" x2="-10" y1="-45" y2="-30"></line>
+                <line stroke="#8fa8a1" stroke-dasharray="5,4" stroke-width="3" x1="-40" x2="-10" y1="-25" y2="-10"></line>
+                <line stroke="#8fa8a1" stroke-dasharray="5,4" stroke-width="3" x1="-40" x2="-10" y1="-5" y2="10"></line>
+                <line stroke="#8fa8a1" stroke-dasharray="5,4" stroke-width="3" x1="10" x2="50" y1="-25" y2="-45"></line>
+                <line stroke="#8fa8a1" stroke-dasharray="5,4" stroke-width="3" x1="10" x2="50" y1="-5" y2="-25"></line>
+                <line stroke="#8fa8a1" stroke-dasharray="5,4" stroke-width="3" x1="10" x2="50" y1="15" y2="-5"></line>
+                <!-- Red Cross Helipad on Roof -->
+                <ellipse cx="6" cy="-66" fill="#e8e4dc" rx="16" ry="8" stroke="#c85a32" stroke-width="1.2"></ellipse>
+                <polygon fill="#c85a32" points="4,-70 8,-70 8,-62 4,-62"></polygon>
+                <polygon fill="#c85a32" points="2,-68 10,-68 10,-64 2,-64"></polygon>
+                <!-- Emergency Ambulance Access Ramp -->
+                <polygon fill="#c85a32" opacity="0.85" points="-60,35 -20,55 -20,45 -60,25"></polygon>
+                <polygon fill="#a4401c" points="-20,55 0,45 0,35 -20,45"></polygon>
+                <!-- Trees -->
+                <polygon fill="#846d52" points="-20,15 -14,18 -14,35 -20,32"></polygon>
+                <circle cx="-17" cy="12" fill="#3d6a4e" r="10"></circle>
+                <circle cx="-14" cy="9" fill="#4d7e5f" r="7"></circle>
+                <circle cx="45" cy="22" fill="#e0a39a" opacity="0.9" r="8"></circle>
+                <circle cx="43" cy="20" fill="#f4c2ba" r="6"></circle>
+                <!-- Hospital Label -->
+                <g transform="translate(5, -115)">
+                  <rect fill="#fbf9f5" filter="url(#gentleGlow)" height="22" rx="11" stroke="#c85a32" stroke-width="1.2" width="96" x="-48" y="-11"></rect>
+                  <text fill="#2b2e2b" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" font-weight="700" text-anchor="middle" x="0" y="3">#H-01 ST. JUDE</text>
+                </g>
+              </g>
+
+              <!-- LAYER: POWER SUBSTATION & WIND MAST (#E-01) -->
+              <g class="cursor-pointer group" id="powerDiorama" onclick="window.selectNode('E-01')" transform="translate(-240, -60)">
+                <polygon fill="#d9d2c5" points="-40,15 0,35 40,15 0,-5" stroke="#bfb8ab" stroke-width="1"></polygon>
+                <!-- Transformer 1 -->
+                <polygon fill="#8a9891" points="-25,5 -10,12 -10,-8 -25,-15"></polygon>
+                <polygon fill="#727f79" points="-10,12 5,5 5,-15 -10,-8"></polygon>
+                <polygon fill="#a0ada7" points="-25,-15 -10,-8 5,-15 -10,-22"></polygon>
+                <ellipse cx="-10" cy="-6" fill="none" rx="18" ry="9" stroke="#d86b3d" stroke-dasharray="3,3" stroke-width="1.2"></ellipse>
+                <!-- Transformer 2 -->
+                <polygon fill="#8a9891" points="5,20 18,26 18,6 5,0"></polygon>
+                <polygon fill="#727f79" points="18,26 30,20 30,0 18,6"></polygon>
+                <polygon fill="#a0ada7" points="5,0 18,6 30,0 17,-6"></polygon>
+                <!-- Wind Turbine Mast -->
+                <polygon fill="#eae5db" points="-2,0 2,0 1,-65 -1,-65"></polygon>
+                <circle cx="0" cy="-65" fill="#3d6a4e" r="3.5"></circle>
+                <line stroke="#3d6a4e" stroke-linecap="round" stroke-width="2" x1="0" x2="-18" y1="-65" y2="-75"></line>
+                <line stroke="#3d6a4e" stroke-linecap="round" stroke-width="2" x1="0" x2="16" y1="-65" y2="-76"></line>
+                <line stroke="#3d6a4e" stroke-linecap="round" stroke-width="2" x1="0" x2="1" y1="-65" y2="-45"></line>
+                <!-- Substation Label -->
+                <g transform="translate(0, -90)">
+                  <rect fill="#fbf9f5" filter="url(#gentleGlow)" height="20" rx="10" stroke="#d86b3d" stroke-width="1.2" width="90" x="-45" y="-10"></rect>
+                  <text fill="#2b2e2b" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" font-weight="700" text-anchor="middle" x="0" y="3.5">#E-01 SUBSTATION</text>
+                </g>
+              </g>
+
+              <!-- LAYER: METRO CENTRAL TRANSIT HUB (#T-02) -->
+              <g class="cursor-pointer group" id="metroDiorama" onclick="window.selectNode('T-02')" transform="translate(-10, -10)">
+                <polygon fill="#d2cbbe" points="-30,5 0,20 30,5 0,-10"></polygon>
+                <polygon fill="#fbf9f5" points="-25,-5 0,7 25,-5 0,-17" stroke="#c0b9ac" stroke-width="0.8"></polygon>
+                <path d="M -22,-6 Q 0,-26 22,-6 L 22,-12 Q 0,-32 -22,-12 Z" fill="#3d6a4e" opacity="0.85"></path>
+                <circle cx="0" cy="-2" fill="#c85a32" r="3"></circle>
+                <g transform="translate(0, -42)">
+                  <rect fill="#fbf9f5" height="18" rx="9" stroke="#767168" stroke-width="1" width="76" x="-38" y="-9"></rect>
+                  <text fill="#2b2e2b" font-family="'Plus Jakarta Sans', sans-serif" font-size="8.5" font-weight="600" text-anchor="middle" x="0" y="3">#T-02 METRO</text>
+                </g>
+              </g>
+
+              <!-- DECORATIVE LANDSCAPING -->
+              <g transform="translate(-320, 10)">
+                <circle cx="0" cy="0" fill="#3d6a4e" r="14"></circle>
+                <circle cx="3" cy="-3" fill="#4d7e5f" r="10"></circle>
+                <circle cx="-16" cy="10" fill="#325740" r="11"></circle>
+                <circle cx="15" cy="8" fill="#588d6c" r="9"></circle>
+              </g>
+              <g transform="translate(280, 80)">
+                <polygon fill="#8f897d" points="0,0 12,6 16,-8 5,-14 -6,-6"></polygon>
+                <polygon fill="#a39d91" points="0,0 5,-14 16,-8"></polygon>
+                <polygon fill="#7a756b" points="18,10 26,14 28,4 20,2"></polygon>
+                <circle cx="-12" cy="5" fill="#e0a39a" opacity="0.85" r="7"></circle>
+              </g>
+
+              <!-- DYNAMIC ENERGY & TRANSIT RIPPLE PARTICLES -->
+              <g fill="none" opacity="0.6" stroke="#3d6a4e" stroke-dasharray="3,6" stroke-width="1.5">
+                <path d="M -210,-40 Q -160,20 -140,75"></path>
+                <path d="M 90,130 Q 30,60 0,10"></path>
+                <path d="M 10,0 Q 90,-20 140,-25" stroke="#c85a32" stroke-width="2"></path>
+              </g>
+            </g>
+
+          </svg>
+
+          <!-- TOPOLOGICAL INTERDEPENDENCY MATRIX OVERLAY -->
+          <div class="absolute inset-0 z-35 bg-surface/95 backdrop-blur-md p-6 overflow-y-auto hidden transition-all duration-300 pointer-events-auto" id="matrixViewOverlay">
+            <div class="max-w-4xl mx-auto flex flex-col gap-4">
+              <div class="flex items-center justify-between pb-3 border-b border-surface-container-highest/80">
+                <div class="flex items-center gap-3">
+                  <span class="w-8 h-8 rounded-xl bg-moss-soft text-moss flex items-center justify-center">
+                    <span class="material-symbols-outlined text-[20px]">grid_4x4</span>
+                  </span>
+                  <div>
+                    <h3 class="font-serif font-bold text-base text-primary">Cross-Domain Topological Interdependency Matrix (D)</h3>
+                    <p class="text-xs text-stone">Real-time cascade transfer coefficients &amp; stress coupling between infrastructure assets</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-[11px] font-mono px-2.5 py-1 rounded-full bg-surface-container text-stone font-semibold">VERLET-4 FEA COUPLING</span>
+                  <button class="w-8 h-8 rounded-xl bg-surface-dim hover:bg-surface-container text-stone flex items-center justify-center transition-colors" id="btnCloseMatrix" type="button">
+                    <span class="material-symbols-outlined text-[18px]">close</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Interactive Matrix Table -->
+              <div class="overflow-x-auto rounded-2xl border border-surface-container-highest/70 bg-surface shadow-soft">
+                <table class="w-full text-xs text-left border-collapse" id="matrixTable">
+                  <thead>
+                    <tr class="bg-surface-dim border-b border-surface-container-highest/70 font-mono text-[11px] text-stone">
+                      <th class="py-3 px-4 font-serif text-stone-dark">Source Failure Point</th>
+                      <th class="py-3 px-3 text-center">Power Grid (E)</th>
+                      <th class="py-3 px-3 text-center">Road Arterials (T)</th>
+                      <th class="py-3 px-3 text-center">Healthcare (H)</th>
+                      <th class="py-3 px-3 text-center">Water System (W)</th>
+                      <th class="py-3 px-3 text-center">Cascade Multiplier</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-surface-container-highest/50 font-sans" id="matrixTableBody">
+                    <!-- Populated dynamically via app.js -->
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="flex flex-wrap items-center justify-between gap-3 text-xs text-stone pt-2">
+                <div class="flex items-center gap-4">
+                  <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-moss"></span> Low (0.00 – 0.30)</span>
+                  <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-warm"></span> Moderate (0.31 – 0.70)</span>
+                  <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-terracotta"></span> Critical Cascade (&gt; 0.70)</span>
+                </div>
+                <div class="font-mono text-[11px] text-stone-light">
+                  Click any row to select failure point and focus 3D camera
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- FLOATING TACTILE CALLOUT INSPECTOR (GLASS OVERLAY CARD) -->
+          <!-- Hidden until the user clicks a building in the 3D scene (or another asset picker); closable via btnCloseInspector or by clicking empty ground. -->
+          <div class="absolute top-16 left-4 z-30 pointer-events-auto max-w-[310px] w-full transition-all duration-300 hidden" id="inspectorOverlay">
+            <div class="bg-surface/95 backdrop-blur-md rounded-2xl p-4 shadow-float border border-surface-container-highest/90 text-stone-dark" id="inspectorCard">
+              <div class="flex items-center justify-between pb-2 border-b border-surface-container-highest">
+                <div class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-moss" id="inspectPing"></span>
+                  <span class="font-serif font-bold text-xs tracking-tight text-primary" id="inspectTitle">Central Bridge</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-moss-soft text-moss font-semibold" id="inspectStatus">OPERATIONAL</span>
+                  <button class="w-5 h-5 flex items-center justify-center rounded-full text-stone hover:text-stone-dark hover:bg-surface-container transition-colors" id="btnCloseInspector" type="button" title="Close inspector" aria-label="Close inspector">
+                    <span class="material-symbols-outlined text-[15px]">close</span>
+                  </button>
+                </div>
+              </div>
+              <div class="mt-3 space-y-2 text-xs">
+                <div class="flex items-center justify-between">
+                  <span class="text-stone">Structural Tension:</span>
+                  <span class="font-mono font-bold text-moss" id="inspectTension">0% [Nominal]</span>
+                </div>
+                <!-- Tension Stress Bar -->
+                <div class="w-full bg-surface-container h-2 rounded-full overflow-hidden flex" id="inspectBar">
+                  <div class="bg-moss h-full" id="inspectBarMoss" style="width: 0%"></div>
+                  <div class="bg-amber-warm h-full" id="inspectBarAmber" style="width: 0%"></div>
+                  <div class="bg-terracotta h-full" id="inspectBarTerra" style="width: 0%"></div>
+                </div>
+                <div class="flex items-center justify-between pt-1">
+                  <span class="text-stone">Material Spec:</span>
+                  <span class="text-stone-dark font-medium" id="inspectMat">Nordic Pine Deck &amp; Steel Cable</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-stone">Downstream Impact:</span>
+                  <span class="text-stone-dark font-medium" id="inspectImpact">#E-01, #T-02, #H-01 (Ambulance)</span>
+                </div>
+                <div class="flex items-center justify-between pt-1 border-t border-surface-container-highest">
+                  <span class="text-stone">Predicted Shear Time:</span>
+                  <span class="font-mono font-semibold text-moss" id="inspectShear">Stable Flow</span>
+                </div>
+              </div>
+              <div class="mt-3 pt-2.5 border-t border-surface-container-highest flex items-center justify-between">
+                <button class="text-moss hover:text-moss-dark text-[11px] font-medium flex items-center gap-1 transition-colors" id="btnIsolateMember" type="button">
+                  <span class="material-symbols-outlined text-[14px]">tune</span> Isolate Member
+                </button>
+                <button class="text-stone hover:text-stone-dark text-[11px] font-medium flex items-center gap-1 transition-colors" id="btnFiniteAnalysis" type="button">
+                  <span>Finite Analysis</span> →
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3D NAVIGATION HINTS BADGE -->
+          <div class="absolute bottom-20 left-4 z-20 pointer-events-none hidden md:flex items-center gap-2 bg-surface/90 backdrop-blur-sm px-3 py-1.5 rounded-xl border border-surface-container-highest/80 text-[11px] font-mono text-stone shadow-soft" id="navHintsBadge">
+            <span class="w-2 h-2 rounded-full bg-moss animate-pulse"></span>
+            <span>🕹️ Orbit: Left Drag • Pan: Right Drag • Zoom: Wheel • Click: Inspect</span>
+          </div>
+
+          <!-- 3D HOVER TOOLTIP -->
+          <div class="absolute pointer-events-none hidden z-40 bg-surface/95 backdrop-blur-md px-3 py-1.5 rounded-xl shadow-float border border-surface-container-highest text-stone-dark text-xs font-sans transition-opacity shadow-lg" id="polybridge3dTooltip">
+            <div class="font-bold text-[11px] text-primary" id="ttName">Central Bridge</div>
+            <div class="text-[10px] text-stone font-mono flex items-center gap-2 mt-0.5">
+              <span class="px-1.5 py-0.2 rounded bg-moss/20 text-moss-dark uppercase font-semibold text-[9px]" id="ttDomain">ROAD</span>
+              <span class="text-terracotta font-semibold" id="ttLoad">Load: 88%</span>
+            </div>
+          </div>
+
+          <!-- DOCKED BOTTOM TIMELINE CONTROLLER (POLY BRIDGE PLAYBACK) -->
+          <div class="absolute bottom-4 left-4 right-4 z-30 bg-surface/90 backdrop-blur-md px-4 py-2.5 rounded-2xl shadow-soft border border-surface-container-highest/80 flex flex-wrap items-center justify-between gap-4" id="timelineDock">
+            <!-- Play/Pause & Clock -->
+            <div class="flex items-center gap-3">
+              <button class="w-8 h-8 rounded-xl bg-primary text-white flex items-center justify-center hover:bg-moss transition-colors shadow-sm" id="timelinePlayToggle" type="button">
+                <span class="material-symbols-outlined text-[18px]" id="playIcon">play_arrow</span>
+              </button>
+              <div>
+                <div class="text-[10px] text-stone uppercase tracking-wider font-serif">Simulation Time</div>
+                <div class="font-mono font-bold text-xs text-stone-dark" id="timelineClock">T +00:00:00</div>
+              </div>
+            </div>
+            <!-- Scrubber Track -->
+            <div class="flex-1 max-w-md hidden sm:flex flex-col gap-1">
+              <div class="flex justify-between text-[10px] text-stone font-mono">
+                <span>T+00:00 [Trigger]</span>
+                <span class="text-terracotta font-medium" id="scrubberEvent">T+01:15 [Shear]</span>
+                <span>T+08:00 [Equilibrium]</span>
+              </div>
+              <div class="relative w-full h-2.5 bg-surface-container rounded-full overflow-hidden flex items-center cursor-pointer" id="scrubberTrack">
+                <div class="h-full bg-terracotta/40 rounded-full" id="scrubberFill" style="width: 0%"></div>
+                <div class="w-3.5 h-3.5 rounded-full bg-terracotta border-2 border-white shadow-sm absolute left-0 -ml-1.5" id="scrubberThumb"></div>
+              </div>
+            </div>
+            <!-- Playback Speed -->
+            <div class="flex items-center gap-1 bg-surface-dim p-1 rounded-xl border border-surface-container-highest/40 text-xs">
+              <button class="speed-btn px-2 py-0.5 rounded-lg text-stone hover:text-stone-dark" data-speed="1">1x</button>
+              <button class="speed-btn px-2 py-0.5 rounded-lg bg-surface text-stone-dark font-semibold shadow-xs" data-speed="2">2x</button>
+              <button class="speed-btn px-2 py-0.5 rounded-lg text-stone hover:text-stone-dark" data-speed="4">4x</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TACTILE POTENTIOMETERS & MECHANICAL SLIDER CONSOLE -->
+      <div class="w-full bg-surface rounded-3xl p-5 shadow-soft border border-surface-container-highest/70" id="actuatorsPanel">
+        <!-- Collapsible header: the whole row toggles the console; the chevron on the right shows
+             the state. While collapsed, the summary chips show the armed failure point and the
+             three actuator settings. The open/closed choice is remembered (localStorage). -->
+        <button aria-controls="actuatorsBody" aria-expanded="false" class="w-full flex items-center justify-between gap-3 text-left group focus:outline-none" id="actuatorsToggle" title="Expand / collapse the actuator console" type="button">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <span class="w-6 h-6 rounded-lg bg-surface-container flex items-center justify-center text-moss shrink-0">
+              <span class="material-symbols-outlined text-[16px]">tune</span>
+            </span>
+            <h2 class="font-serif font-bold text-sm tracking-tight text-primary truncate">Harmonic Stress Actuators &amp; Conditions</h2>
+          </div>
+          <div class="flex items-center gap-2.5 shrink-0">
+            <span class="hidden sm:flex items-center gap-1.5 text-[10px] font-mono text-stone" id="actuatorsSummary">
+              <span class="px-2 py-0.5 rounded-full bg-surface-dim border border-surface-container-highest/60 text-stone-dark font-semibold" id="actSumAsset">Central Bridge</span>
+              <span class="px-2 py-0.5 rounded-full bg-surface-dim border border-surface-container-highest/60" title="Shock magnitude" id="actSumMag">50%</span>
+              <span class="px-2 py-0.5 rounded-full bg-surface-dim border border-surface-container-highest/60" title="Closure duration" id="actSumDur">8h</span>
+              <span class="px-2 py-0.5 rounded-full bg-surface-dim border border-surface-container-highest/60" title="Ambient weather" id="actSumWea">24°C</span>
+            </span>
+            <span class="hidden md:inline text-[11px] font-mono text-stone" id="actuatorsTolerance" style="display: none">TOLERANCE ±0.05% // NON-LINEAR FEA</span>
+            <span class="w-7 h-7 rounded-xl bg-surface-dim border border-surface-container-highest/60 flex items-center justify-center text-stone group-hover:text-stone-dark group-hover:bg-surface-container transition-colors">
+              <span class="material-symbols-outlined text-[18px] transition-transform duration-300" id="actuatorsChevron">expand_more</span>
+            </span>
+          </div>
+        </button>
+
+        <!-- Collapsible body: grid-row trick (0fr <-> 1fr) glides between heights without
+             measuring; the inner wrapper clips during the glide and is released afterwards so
+             the Failure Point popover can overflow the panel. -->
+        <div class="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-out" id="actuatorsBody">
+          <div class="min-h-0 overflow-hidden" id="actuatorsBodyInner">
+            <div class="pt-4 mt-3 border-t border-surface-container-highest/60">
+              <!-- FAILURE POINT MENU: pick ANY of the city's assets as the initiating failure.
+                   Populated from /api/city (or the offline model) by app.js; searchable, filterable
+                   by domain, keyboard navigable. Selecting an asset focuses the 3D camera on it and
+                   re-runs the solver with the actuator settings below. -->
+              <div class="relative mb-4 bg-surface-dim p-3.5 rounded-2xl border border-surface-container-highest/50" id="failurePointPanel">
+                <div class="flex items-center justify-between gap-3 flex-wrap">
+                  <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                    <span class="w-6 h-6 rounded-lg bg-terracotta-soft text-terracotta flex items-center justify-center shrink-0">
+                      <span class="material-symbols-outlined text-[16px]">my_location</span>
+                    </span>
+                    <div class="shrink-0">
+                      <span class="block text-xs font-serif text-stone leading-tight">Failure Point</span>
+                      <span class="block text-[10px] font-mono text-stone-light leading-tight">INITIATING ASSET</span>
+                    </div>
+                    <button aria-controls="failurePointMenu" aria-expanded="false" aria-haspopup="listbox" class="min-w-0 flex-1 max-w-xl flex items-center gap-2 px-3 py-1.5 rounded-xl bg-surface border border-surface-container-highest/70 hover:border-moss/70 focus:outline-none focus:border-moss text-left transition-colors shadow-sm" id="failurePointBtn" title="Choose which asset fails first" type="button">
+                      <span class="material-symbols-outlined text-[16px] text-moss shrink-0" id="fpBtnIcon">route</span>
+                      <span class="text-xs font-semibold text-stone-dark truncate" id="fpBtnName">Central Bridge</span>
+                      <span class="hidden sm:inline text-[10px] font-mono text-stone-light shrink-0" id="fpBtnId">road_3_2</span>
+                      <span class="ml-auto text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-terracotta-soft text-terracotta shrink-0" id="fpBtnLoad">86% Load</span>
+                      <span class="material-symbols-outlined text-[18px] text-stone shrink-0 transition-transform" id="fpBtnChevron">expand_more</span>
+                    </button>
+                  </div>
+                  <div class="flex items-center gap-1.5 flex-wrap text-[10px] font-mono" id="fpInfoChips">
+                    <span class="px-2 py-0.5 rounded-full bg-moss-soft text-moss-dark font-semibold" id="fpDomainChip">ROAD NETWORK</span>
+                    <span class="px-2 py-0.5 rounded-full bg-surface text-stone border border-surface-container-highest/60" id="fpDistrictChip">West Riverfront</span>
+                    <span class="px-2 py-0.5 rounded-full bg-surface text-stone border border-surface-container-highest/60" id="fpPopChip">35k served</span>
+                    <span class="px-2 py-0.5 rounded-full bg-terracotta-soft text-terracotta font-semibold hidden" id="fpCritChip" title="Ranked single point of failure (Brandes betweenness centrality)">SPOF #6</span>
+                  </div>
+                </div>
+
+                <!-- Popover listbox -->
+                <div class="hidden absolute left-0 right-0 top-full mt-2 z-40 bg-surface rounded-2xl shadow-float border border-surface-container-highest/80 overflow-hidden" id="failurePointMenu">
+                  <div class="p-2.5 border-b border-surface-container-highest/60 flex flex-col sm:flex-row sm:items-center gap-2">
+                    <div class="flex items-center gap-2 px-2.5 py-1.5 flex-1 bg-surface-dim rounded-xl border border-surface-container-highest/40 focus-within:border-moss/70 transition-colors">
+                      <span class="material-symbols-outlined text-[16px] text-stone">search</span>
+                      <input autocomplete="off" class="w-full bg-transparent border-none p-0 text-xs text-stone-dark placeholder:text-stone-light focus:outline-none focus:ring-0" id="failurePointSearch" placeholder="Search assets by name, id, type or district…" type="text"/>
+                    </div>
+                    <div class="flex items-center gap-1 shrink-0" id="fpFilters" role="group" aria-label="Filter by domain">
+                      <button class="fp-filter px-2.5 py-1 rounded-lg text-[11px] font-medium bg-stone-dark text-white transition-colors" data-domain="all" type="button">All</button>
+                      <button class="fp-filter px-2.5 py-1 rounded-lg text-[11px] font-medium bg-surface-dim hover:bg-surface-container text-amber-warm flex items-center gap-1 transition-colors" data-domain="power" type="button"><span class="w-1.5 h-1.5 rounded-full bg-amber-warm"></span>Grid</button>
+                      <button class="fp-filter px-2.5 py-1 rounded-lg text-[11px] font-medium bg-surface-dim hover:bg-surface-container text-moss-dark flex items-center gap-1 transition-colors" data-domain="road" type="button"><span class="w-1.5 h-1.5 rounded-full bg-moss"></span>Roads</button>
+                      <button class="fp-filter px-2.5 py-1 rounded-lg text-[11px] font-medium bg-surface-dim hover:bg-surface-container text-terracotta flex items-center gap-1 transition-colors" data-domain="health" type="button"><span class="w-1.5 h-1.5 rounded-full bg-terracotta"></span>Trauma</button>
+                    </div>
+                  </div>
+                  <div aria-label="Failure point candidates" class="max-h-[340px] overflow-y-auto p-1.5" id="failurePointList" role="listbox" tabindex="-1">
+                    <div class="text-[11px] text-stone-light text-center py-6">Loading city assets…</div>
+                  </div>
+                  <div class="px-3 py-1.5 border-t border-surface-container-highest/60 flex items-center justify-between text-[10px] font-mono text-stone">
+                    <span id="failurePointCount">— assets</span>
+                    <span class="hidden sm:inline">↑↓ navigate · ↵ select · esc close</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- SLIDER 1: STRESS MAGNITUDE -->
+                <div class="bg-surface-dim p-3.5 rounded-2xl border border-surface-container-highest/50 flex flex-col justify-between">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-serif text-stone">1. Shock Magnitude</span>
+                    <span class="font-mono font-bold text-xs text-terracotta bg-terracotta-soft px-2 py-0.5 rounded-full" id="valMagnitude">85% [Critical]</span>
+                  </div>
+                  <div class="my-3">
+                    <input class="w-full" id="rangeMagnitude" max="100" min="10" type="range" value="85"/>
+                    <div class="flex justify-between text-[10px] text-stone mt-1">
+                      <span>10% Minor</span>
+                      <span>50% Elastic</span>
+                      <span class="text-terracotta">100% Fracture</span>
+                    </div>
+                  </div>
+                  <div class="text-[11px] text-stone-light flex justify-between pt-1 border-t border-surface-container-highest/40">
+                    <span>Truss Strain Limit:</span>
+                    <span class="font-mono text-stone-dark" id="strainLimitReadout">450 MPa</span>
+                  </div>
+                </div>
+                <!-- SLIDER 2: OUTAGE TIME -->
+                <div class="bg-surface-dim p-3.5 rounded-2xl border border-surface-container-highest/50 flex flex-col justify-between">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-serif text-stone">2. Closure Duration</span>
+                    <span class="font-mono font-bold text-xs text-moss-dark bg-moss-soft px-2 py-0.5 rounded-full" id="valDuration">8.0 Hours</span>
+                  </div>
+                  <div class="my-3">
+                    <input class="w-full" id="rangeDuration" max="24" min="1" step="0.5" type="range" value="8"/>
+                    <div class="flex justify-between text-[10px] text-stone mt-1">
+                      <span>1h</span>
+                      <span>8h Peak</span>
+                      <span>24h Extended</span>
+                    </div>
+                  </div>
+                  <div class="text-[11px] text-stone-light flex justify-between pt-1 border-t border-surface-container-highest/40">
+                    <span>Grid Battery Buffer:</span>
+                    <span class="font-mono text-stone-dark" id="batteryBufferReadout">12.5h Reserve</span>
+                  </div>
+                </div>
+                <!-- SLIDER 3: AMBIENT WEATHER -->
+                <div class="bg-surface-dim p-3.5 rounded-2xl border border-surface-container-highest/50 flex flex-col justify-between">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-serif text-stone">3. Ambient Weather</span>
+                    <span class="font-mono font-bold text-xs text-stone-dark bg-surface px-2 py-0.5 rounded-full" id="valWeather">48 KTS Gale</span>
+                  </div>
+                  <div class="my-3">
+                    <input class="w-full" id="rangeWeather" max="75" min="0" type="range" value="48"/>
+                    <div class="flex justify-between text-[10px] text-stone mt-1">
+                      <span>0 Calm</span>
+                      <span>35 Breeze</span>
+                      <span>75 Typhoon</span>
+                    </div>
+                  </div>
+                  <div class="text-[11px] text-stone-light flex justify-between pt-1 border-t border-surface-container-highest/40">
+                    <span>Aero Damping:</span>
+                    <span class="font-mono text-moss font-semibold">Engaged (0.82)</span>
+                  </div>
+                </div>
+              </div>
+              <!-- Asset Selector & Equilibrium Mode Row -->
+              <div class="mt-4 pt-3 border-t border-surface-container-highest/60 flex flex-wrap items-center justify-between gap-3 text-xs">
+                <div class="flex items-center gap-3 flex-wrap">
+                  <div class="flex items-center gap-1.5 bg-surface-dim px-2.5 py-1 rounded-xl border border-surface-container-highest/50">
+                    <span class="text-stone">Propagation:</span>
+                    <button class="font-mono font-semibold text-moss hover:text-moss-dark uppercase text-[11px]" id="btnPropMode" type="button">DYNAMIC DAMPING</button>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button class="px-3.5 py-1.5 rounded-xl bg-surface-dim hover:bg-surface-container text-stone-dark font-medium transition-colors border border-surface-container-highest/50 flex items-center gap-1" id="resetBtn" type="button">
+                    <span class="material-symbols-outlined text-[15px]">restart_alt</span>
+                    <span>Reset State</span>
+                  </button>
+                  <button class="px-4 py-1.5 rounded-xl bg-moss hover:bg-moss-dark text-white font-medium shadow-sm flex items-center gap-1.5 transition-colors" id="recalcBtn" type="button">
+                    <span class="material-symbols-outlined text-[15px]">refresh</span>
+                    <span>Solve FEA</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HARDENING RECOMMENDATIONS (ELEGANT RESILIENCE LIST) -->
+      <div class="w-full bg-surface rounded-3xl p-5 shadow-soft border border-surface-container-highest/70 flex flex-col justify-between" id="interventionsPanel">
+        <div>
+          <div class="flex items-center justify-between pb-3 border-b border-surface-container-highest/60">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-lg bg-moss-soft text-moss flex items-center justify-center">
+                <span class="material-symbols-outlined text-[16px]">verified</span>
+              </span>
+              <h2 class="font-serif font-bold text-sm text-primary tracking-tight">Hardening Interventions</h2>
+            </div>
+            <span class="text-[10px] font-serif text-stone">Priority Order</span>
+          </div>
+          <div class="mt-3.5 space-y-2.5" id="hardeningList">
+            <div class="text-[11px] text-stone-light font-sans text-center py-4">
+              Run a simulation to see which specific assets are worth hardening for this scenario.
+            </div>
+          </div>
+        </div>
+        <!-- Export & Document Plan Button -->
+        <div class="mt-4 pt-3 border-t border-surface-container-highest/60 flex items-center gap-2">
+          <button class="flex-1 py-2 rounded-xl bg-stone-dark hover:bg-black text-white text-xs font-medium flex items-center justify-center gap-1.5 transition-colors shadow-sm" id="btnExportBlueprint" type="button">
+            <span class="material-symbols-outlined text-[16px]">download</span>
+            <span>Export Resilience Blueprint</span>
+          </button>
+          <button class="p-2 rounded-xl bg-surface-dim hover:bg-surface-container text-stone-dark border border-surface-container-highest/50 transition-colors" title="Print Plan" id="btnPrintPlan" type="button">
+            <span class="material-symbols-outlined text-[16px]">print</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- CASCADE NARRATIVE LOG (plain-English explanation of the current run + how the
+           interventions above would actually play out) -->
+      <div class="w-full bg-surface rounded-3xl p-5 shadow-soft border border-surface-container-highest/70">
+        <div class="flex items-center justify-between pb-3 border-b border-surface-container-highest/60">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-surface-container flex items-center justify-center text-stone-dark">
+              <span class="material-symbols-outlined text-[16px]">terminal</span>
+            </span>
+            <div>
+              <h2 class="font-serif font-bold text-sm text-primary tracking-tight">Cascade Narrative Log</h2>
+              <span class="text-[10px] font-mono text-stone">PLAIN-ENGLISH BRIEFING</span>
+            </div>
+          </div>
+        </div>
+        <div class="mt-3.5 text-[12px] leading-relaxed text-stone font-sans max-h-72 overflow-y-auto pr-1" id="narrativeLogBody">
+          <p class="text-stone-light">Run a simulation to generate a briefing.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT 4 COLS: TELEMETRY & HARDENING RECOMMENDATIONS -->
+    <div class="xl:col-span-4 flex flex-col gap-4">
+      <!-- IMPACT TELEMETRY CARD (JAPANESE EDITORIAL MINIMALISM) -->
+      <div class="w-full bg-surface rounded-3xl p-5 shadow-soft border border-surface-container-highest/70">
+        <div class="flex items-center justify-between pb-3 border-b border-surface-container-highest/60">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-terracotta"></span>
+            <h2 class="font-serif font-bold text-sm text-primary tracking-tight">Cascading Impact Telemetry</h2>
+          </div>
+          <span class="text-[11px] font-mono px-2 py-0.5 rounded-full bg-moss-soft text-moss font-semibold" id="telemetryBadge">NOMINAL</span>
+        </div>
+        <div class="mt-4 space-y-3.5">
+          <!-- Metric 1: Total Population -->
+          <div class="bg-surface-dim p-3.5 rounded-2xl border border-surface-container-highest/50">
+            <span class="text-[11px] font-serif text-stone block">Disrupted Metropolitan Population</span>
+            <div class="flex items-baseline justify-between mt-1">
+              <span class="text-2xl font-serif font-bold text-stone-dark tracking-tight" id="kpiPopAffected">0</span>
+              <span class="text-xs font-mono font-semibold text-moss flex items-center" id="kpiStrainPct">0% strain</span>
+            </div>
+            <p class="text-[11px] text-stone-light mt-1" id="kpiPopSub">No service disruption — every sector operating within design load</p>
+          </div>
+          <!-- Metric 2: Road Congestion & Gridlock -->
+          <div class="bg-surface-dim p-3.5 rounded-2xl border border-surface-container-highest/50">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-serif text-stone">Arterial Congestion</span>
+              <span class="font-mono font-bold text-moss" id="kpiCongestionRatio">100% Baseline</span>
+            </div>
+            <div class="flex items-baseline gap-2 mt-1">
+              <span class="text-xl font-serif font-bold text-stone-dark" id="kpiCongestionKm">0 km</span>
+              <span class="text-xs text-stone">paralyzed primary corridors</span>
+            </div>
+            <!-- Layered bar -->
+            <div class="w-full bg-surface-container h-2 rounded-full mt-2.5 overflow-hidden flex">
+              <div class="bg-moss h-full transition-all duration-500" id="flowBarFlowing" style="width: 100%" title="Flowing"></div>
+              <div class="bg-amber-warm h-full transition-all duration-500" id="flowBarSlow" style="width: 0%" title="Slow"></div>
+              <div class="bg-terracotta h-full transition-all duration-500" id="flowBarGridlock" style="width: 0%" title="Gridlock"></div>
+            </div>
+          </div>
+          <!-- Metric 3: Healthcare Emergency Delay -->
+          <div class="bg-surface-dim p-3.5 rounded-2xl border border-surface-container-highest/50">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-serif text-stone">Hospital Trauma Influx</span>
+              <span class="font-mono font-bold text-moss bg-moss-soft px-2 py-0.5 rounded-full text-[11px]" id="kpiTraumaDelay">+0m Delay</span>
+            </div>
+            <div class="mt-1 flex items-baseline gap-2">
+              <span class="text-xl font-serif font-bold text-moss" id="kpiCorridorsSevered">0 Corridors</span>
+              <span class="text-xs text-stone">severed to emergency intake</span>
+            </div>
+            <div class="text-[11px] text-stone mt-1.5 flex justify-between">
+              <span>Auxiliary Generator Reserves:</span>
+              <span class="font-mono font-medium text-stone-dark" id="kpiGeneratorReserve">100% (standby)</span>
+            </div>
+          </div>
+          <!-- Metric 4: Power Equilibrium & Restoration -->
+          <div class="bg-surface-dim p-3.5 rounded-2xl border border-surface-container-highest/50">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-serif text-stone">Electrical Deficit &amp; Reroute</span>
+              <span class="font-mono font-bold text-moss" id="kpiPowerDeficit">0 MWh</span>
+            </div>
+            <div class="flex items-baseline justify-between mt-1">
+              <div>
+                <span class="text-xl font-serif font-bold text-stone-dark" id="kpiStabilizationTime">Stable</span>
+                <span class="text-[11px] text-stone block">Projected system stabilization</span>
+              </div>
+              <span class="text-xs font-mono font-semibold text-moss bg-moss-soft px-2 py-1 rounded-xl" id="kpiFeaStatus">FEA STABLE</span>
+            </div>
+          </div>
+        </div>
+        <!-- Domain Stress Balance Rings/Bars -->
+        <div class="mt-4 pt-3.5 border-t border-surface-container-highest/60 space-y-2 text-xs">
+          <div>
+            <div class="flex justify-between font-serif text-stone text-[11px] mb-1">
+              <span>Transit &amp; Bridge Load</span>
+              <span class="font-mono font-bold text-moss" id="barTransitVal">—</span>
+            </div>
+            <div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+              <div class="bg-moss h-full rounded-full transition-all duration-500" id="barTransitFill" style="width: 0%"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between font-serif text-stone text-[11px] mb-1">
+              <span>Grid Capacity Shift</span>
+              <span class="font-mono font-bold text-moss" id="barGridVal">—</span>
+            </div>
+            <div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+              <div class="bg-moss h-full rounded-full transition-all duration-500" id="barGridFill" style="width: 0%"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between font-serif text-stone text-[11px] mb-1">
+              <span>Medical Arterial Resilience</span>
+              <span class="font-mono font-bold text-moss" id="barMedVal">—</span>
+            </div>
+            <div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+              <div class="bg-moss h-full rounded-full transition-all duration-500" id="barMedFill" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BEFORE vs. AFTER STATISTICS HUD (NEW) -->
+      <div class="w-full bg-surface rounded-3xl p-5 shadow-soft border border-surface-container-highest/70" id="beforeAfterHud">
+        <div class="flex items-center justify-between pb-3 border-b border-surface-container-highest/60">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-moss-soft text-moss flex items-center justify-center">
+              <span class="material-symbols-outlined text-[16px]">compare_arrows</span>
+            </span>
+            <div>
+              <h2 class="font-serif font-bold text-sm text-primary tracking-tight">Before vs. After Statistics HUD</h2>
+              <span class="text-[10px] font-mono text-stone">SOLUTION EFFICACY TELEMETRY</span>
+            </div>
+          </div>
+          <span class="text-[11px] font-mono px-2 py-0.5 rounded-full bg-moss-soft text-moss font-semibold" id="hudEfficacyBadge">NO SCENARIO</span>
+        </div>
+
+        <div class="mt-4 space-y-3">
+          <!-- Metric 1: Population Displaced -->
+          <div class="bg-surface-dim p-3.5 rounded-2xl border border-surface-container-highest/50">
+            <div class="flex items-center justify-between text-xs mb-1.5">
+              <span class="font-serif text-stone">Population Displaced</span>
+              <span class="font-mono font-bold text-[11px] text-moss bg-moss-soft px-2 py-0.5 rounded-full" id="hudPopDelta">—</span>
+            </div>
+            <div class="flex items-center justify-between font-mono text-xs">
+              <span class="text-terracotta font-semibold" id="hudPopBaseline">Baseline (—)</span>
+              <span class="text-stone">→</span>
+              <span class="text-moss font-bold" id="hudPopMitigated">Mitigated (—)</span>
+            </div>
+            <!-- Comparative Progress Bar -->
+            <div class="w-full bg-terracotta/20 h-2 rounded-full mt-2.5 overflow-hidden flex">
+              <div class="bg-moss h-full rounded-full transition-all duration-700" id="hudPopBar" style="width: 0%" title="Mitigated Exposure (26% of baseline)"></div>
+            </div>
+          </div>
+
+          <!-- Metric 2: Emergency Transit Delay -->
+          <div class="bg-surface-dim p-3.5 rounded-2xl border border-surface-container-highest/50">
+            <div class="flex items-center justify-between text-xs mb-1.5">
+              <span class="font-serif text-stone">Emergency Transit Delay</span>
+              <span class="font-mono font-bold text-[11px] text-moss bg-moss-soft px-2 py-0.5 rounded-full" id="hudTransitDelta">—</span>
+            </div>
+            <div class="flex items-center justify-between font-mono text-xs">
+              <span class="text-terracotta font-semibold" id="hudTransitBaseline">Baseline (—)</span>
+              <span class="text-stone">→</span>
+              <span class="text-moss font-bold" id="hudTransitMitigated">Mitigated (—)</span>
+            </div>
+            <!-- Comparative Progress Bar -->
+            <div class="w-full bg-terracotta/20 h-2 rounded-full mt-2.5 overflow-hidden flex">
+              <div class="bg-moss h-full rounded-full transition-all duration-700" id="hudTransitBar" style="width: 0%" title="Mitigated Delay (18% of baseline)"></div>
+            </div>
+          </div>
+
+          <!-- Metric 3: Critical Asset Failures -->
+          <div class="bg-surface-dim p-3.5 rounded-2xl border border-surface-container-highest/50">
+            <div class="flex items-center justify-between text-xs mb-1.5">
+              <span class="font-serif text-stone">Critical Asset Failures</span>
+              <span class="font-mono font-bold text-[11px] text-moss bg-moss-soft px-2 py-0.5 rounded-full" id="hudFailuresDelta">—</span>
+            </div>
+            <div class="flex items-center justify-between font-mono text-xs">
+              <span class="text-terracotta font-semibold" id="hudFailuresBaseline">Baseline (—)</span>
+              <span class="text-stone">→</span>
+              <span class="text-moss font-bold" id="hudFailuresMitigated">Mitigated (—)</span>
+            </div>
+            <!-- Comparative Progress Bar -->
+            <div class="w-full bg-terracotta/20 h-2 rounded-full mt-2.5 overflow-hidden flex">
+              <div class="bg-moss h-full rounded-full transition-all duration-700" id="hudFailuresBar" style="width: 0%" title="Mitigated Failures (17% of baseline)"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-3 pt-2.5 border-t border-surface-container-highest/60 flex items-center justify-between text-[11px] text-stone">
+          <span class="flex items-center gap-1 font-mono">
+            <span class="w-2 h-2 rounded-full bg-moss animate-pulse"></span>
+            <span>Non-Linear FEA Validated</span>
+          </span>
+          <span class="font-mono text-moss font-semibold" id="hudResilienceRatio">Resilience Ratio: —</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="w-full bg-surface/90 border-t border-surface-container-highest/70 px-4 sm:px-6 py-2.5 mt-auto text-xs text-stone shadow-soft" id="appFooter">
+    <div class="max-w-[1760px] mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-4 font-serif">
+        <span class="flex items-center gap-1.5 text-stone-dark">
+          <span class="w-2 h-2 rounded-full bg-moss"></span>
+          <span>Simulation Engine: Balanced Verlet-4 Non-Linear FEA</span>
+        </span>
+        <span class="hidden md:inline text-surface-container-highest">|</span>
+        <span class="hidden md:inline text-[11px] text-stone">Grid Balance: 94.2%</span>
+      </div>
+      <div class="flex items-center gap-4 font-mono text-[11px]">
+        <span>Heap Memory: 218 MB</span>
+        <span class="text-surface-container-highest">|</span>
+        <span>Canvas FPS: 60.0</span>
+        <span class="text-surface-container-highest">|</span>
+        <span class="text-moss font-semibold" id="footerResilienceIndex">Resilience Index: 10.0 / 10</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- DIORAMA CONTROLLER & CASCADE PHYSICS INTERFACE -->
+  <script src="src/polybridge3d.js"></script>
+  <script src="app.js"></script>
+  <script src="src/cinematic.js"></script>
+</body>
+</html>
