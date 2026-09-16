@@ -5,7 +5,7 @@ Mapping to UN SDG 9 (Industry, Innovation & Infrastructure) and SDG 11 (Sustaina
 
 A "what happens if this breaks?" simulator for a city. You pick a point of failure — a substation, a bridge, a hospital — and it shows you how that one failure ripples across the rest of the city's infrastructure.
 
-## Why we built this
+## Why exactly did we built this
 
 Most city infrastructure gets planned and modeled one system at a time: roads are their own thing, power is its own thing, hospitals are their own thing. But in a real city they're all tangled together. Take out a substation and you don't just lose lights — you lose traffic signals, which backs up roads, which slows down ambulances, which puts pressure on hospitals that are already running on backup power.
 
