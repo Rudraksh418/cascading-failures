@@ -13,8 +13,8 @@ We wanted to build something that actually shows that chain reaction instead of 
 
 ## What it does
 
-- **Models a city as one connected graph** across three domains: electricity, roads/transport, and healthcare + emergency response, with dependency links between them (e.g. a substation powers a hospital's backup systems and the traffic signals on the roads leading to it).
-- **Simulates cascading failures**: when something fails, its load gets redistributed to neighboring nodes, and anything that gets overloaded fails too. This keeps propagating until things settle down.
+- **Models a city as one connected graph** across three domains: electricity, roads and transport, and healthcare plus emergency response, with dependency links between them (e.g. a substation powers a hospital's backup systems and the traffic signals on the roads leading to it).
+- **Simulates cascading failures**: when something fails, it's load gets redistributed to neighboring nodes, and anything that gets overloaded fails too. This keeps propagating until things settle down.
 - **Ranks critical infrastructure** by how central it is to the network (using betweenness centrality), so you can see which single points of failure matter most — this is the closest thing we have to a "where should the city invest" answer.
 - **Lets you type a plain-English scenario** ("what happens if the bridge near the hospital closes for 8 hours?") and turns it into a simulation.
 - **Visualizes the failure spreading** on the city map, plus an impact summary (people affected, roads overloaded, hospitals impacted, estimated recovery time, etc.) — these numbers are model outputs from our simulation, not real-world predictions.
