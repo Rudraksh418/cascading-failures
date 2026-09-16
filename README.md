@@ -1,106 +1,58 @@
-# CASCADING FAILURES: THE BUTTERFLY EFFECT
-### Multi-Domain Urban Resilience Simulator & Capital Allocation Decision Engine
+# Cascading Failures — The Butterfly Effect
 
-> **Built for Manipal Hackathon 2026 — Theme: "The Butterfly Effect"**  
-> *Mapping to UN SDG 9 (Industry, Innovation & Infrastructure) and SDG 11 (Sustainable Cities & Communities)*
+**Manipal Hackathon 2026** · Theme: *The Butterfly Effect*
+Mapping to UN SDG 9 (Industry, Innovation & Infrastructure) and SDG 11 (Sustainable Cities & Communities)
 
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/)
-[![Zero Dependencies](https://img.shields.io/badge/dependencies-zero-brightgreen.svg)]()
-[![Tests Passing](https://img.shields.io/badge/tests-passing-success.svg)]()
+A "what happens if this breaks?" simulator for a city. You pick a point of failure — a substation, a bridge, a hospital — and it shows you how that one failure ripples across the rest of the city's infrastructure.
 
----
+## Why we built this
 
-## Executive Summary
+Most city infrastructure gets planned and modeled one system at a time: roads are their own thing, power is its own thing, hospitals are their own thing. But in a real city they're all tangled together. Take out a substation and you don't just lose lights — you lose traffic signals, which backs up roads, which slows down ambulances, which puts pressure on hospitals that are already running on backup power.
 
-Modern cities are deeply interconnected networks of networks. A minor, localized event—a tripped transmission breaker or an emergency bridge closure—rarely stays contained. Instead, it triggers a **cascading domino effect**:
+We wanted to build something that actually shows that chain reaction instead of just describing it, and that gives planners something more useful than "here's what failed" — more like "here's what to fix first so this doesn't happen."
 
-$$\text{Power Grid Failure} \longrightarrow \text{Traffic Signals Dark} \longrightarrow \text{Arterial Gridlock} \longrightarrow \text{Ambulance Routes Severed} \longrightarrow \text{Hospital Capacity Drops}$$
+## What it does
 
-**Cascading Failures** turns this threat into an actionable decision-making tool for municipal planners, emergency managers, and infrastructure investors. Rather than just visualizing destruction, our platform precomputes systemic bottlenecks using **Brandes' Betweenness Centrality**, simulates physical load redistribution via a modified **Motter–Lai Threshold Model**, and provides an interactive **"Where to Invest" Capital Planner** that proves how strategic microgrid and bypass investments reduce city-wide cascade damage by over **65%**.
+- **Models a city as one connected graph** across three domains: electricity, roads/transport, and healthcare + emergency response, with dependency links between them (e.g. a substation powers a hospital's backup systems and the traffic signals on the roads leading to it).
+- **Simulates cascading failures**: when something fails, its load gets redistributed to neighboring nodes, and anything that gets overloaded fails too. This keeps propagating until things settle down.
+- **Ranks critical infrastructure** by how central it is to the network (using betweenness centrality), so you can see which single points of failure matter most — this is the closest thing we have to a "where should the city invest" answer.
+- **Lets you type a plain-English scenario** ("what happens if the bridge near the hospital closes for 8 hours?") and turns it into a simulation.
+- **Visualizes the failure spreading** on the city map, plus an impact summary (people affected, roads overloaded, hospitals impacted, estimated recovery time, etc.) — these numbers are model outputs from our simulation, not real-world predictions.
 
----
+## Tech
 
-## Key Features
+Pure Python 3 standard library on the backend, no external dependencies, and a plain HTML/CSS/JS frontend. No installs beyond Python itself.
 
-### 1. Multi-Domain Infrastructure Graph (`Metropolis-7`)
-- **Three Core Coupled Domains**:
-  - **Electricity Grid**: 4 primary substations, 6 high-voltage distribution hubs, and transmission interconnects.
-  - **Transportation**: 56 surface intersections, arterial avenues, and 3 vital river bridges.
-  - **Healthcare & Emergency**: 3 major trauma centers (e.g. *Metropolis General*), 4 acute clinics, and 11 priority ambulance express corridors.
-- **Cross-Domain Dependency Edges**: Realistically models physical dependencies:
-  - Substations power traffic signal telemetry (power loss $\rightarrow$ 50% vehicular capacity drop).
-  - Substations feed hospital life-support systems (loss $\rightarrow$ capacity drops to 45%).
-  - Arterial bridges and avenues carry ambulance ingress corridors into emergency departments.
-
-### 2. Algorithmic Cascade Engine (Motter–Lai Redistribution)
-- **Threshold Overload Model**: When a node or arterial fails, its active load is redistributed to non-failed neighbors weighted by their available capacity.
-- If a neighbor's load exceeds the threshold ($1.15 \times \text{Capacity}$), it trips and cascades.
-- Cross-domain dependency propagation calculates dynamic effective capacities in real time.
-- Convergence guarantee: terminable within 20 iterations to ensure zero infinite loops during live presentations.
-
-### 3. Capital Investment Decision Engine ("Where to Invest")
-- Precomputes exact **Brandes' Betweenness Centrality** across the entire urban topology.
-- Ranks single points of failure by systemic criticality.
-- **Interactive "Reinforce Asset" Simulation**: Hardens high-leverage assets (+60% surge capacity and islanding redundancy) and shows **side-by-side resilience deltas**:
-  - *Citizens Protected*: $+110,000$
-  - *Congestion Delay Saved*: $-28.4\%$
-  - *Emergency Corridors Preserved*: $100\%$
-
-### 4. "The Butterfly Effect" Natural Language Scenario Bar
-- Type real-world prompts: *"What happens if Substation Beta collapses for 8 hours during rush hour?"* or *"Bridge 2 closure"*.
-- Built-in semantic intent parser extracts `{node_id, magnitude, duration}` with offline zero-dependency reliability (plus optional Anthropic/Claude API integration).
-- Includes 1-click **"Greatest Hits"** scenario presets for flawless judging demonstrations.
-
-### 5. High-Tech Command Center UI
-- Canvas & SVG multi-domain interactive map with smooth pan, zoom, and node inspection.
-- **Blast Radius Shockwave**: Concentric expanding shockwaves keyed to topological BFS distance.
-- **Cascade Playback Controller**: Timeline scrubber with Step-by-Step playback (Play, Pause, Step Next, Rewind).
-- **6 Core Resilience KPIs**:
-  1. *People Affected* (with domain breakdown meter)
-  2. *Travel Time Surge %*
-  3. *Emergency Corridors Disrupted*
-  4. *Hospitals Stressed*
-  5. *Roads Overloaded*
-  6. *Estimated Recovery Time (hours)*
-
----
-
-## Quickstart (Zero Installation Required)
-
-The entire project is built with **Pure Python 3 Standard Library** and modern browser standards. No `npm install`, no `pip install`, no API keys required!
-
-### Start the Simulator:
-```bash
+```
 python3 start.py
 ```
-*Your browser will automatically open to `http://localhost:8000`.*
 
-### Run Automated Unit Tests:
-```bash
+Opens the simulator at `http://localhost:8000`.
+
+Run the tests for the cascade engine:
+
+```
 python3 tests/test_cascade.py
 ```
 
----
-
-## Project Architecture
+## How it's laid out
 
 ```
-Dis/
-├── backend/
-│   ├── graph_engine.py      # Core data models, Metropolis-7 generator, Motter-Lai cascade, Brandes centrality
-│   ├── nlp_engine.py        # Semantic scenario parser & plain-English executive debrief generator
-│   └── server.py            # Multi-threaded HTTP REST API & static file server
-├── frontend/
-│   ├── index.html           # Command center dashboard layout & SVG canvas
-│   ├── style.css            # Dark-theme mission-critical operations styling
-│   ├── app.js               # Reactive map renderer, playback scrubber, KPI animations & fallback engine
-│   └── data/
-│       └── city_data.json   # Pre-compiled Metropolis-7 topology & critical asset rankings
-├── tests/
-│   └── test_cascade.py      # 6 comprehensive unit tests validating graph theory & overload dynamics
-├── docs/
-│   ├── PITCH_AND_DEMO_GUIDE.md # 10-sec hook, 2-min video script, and PPT slide outline
-│   └── ARCHITECTURE.md         # Deep technical specification & mathematical equations
-├── start.py                 # One-click launcher
-└── README.md                # Project documentation
+backend/
+  graph_engine.py   — city model, cascade simulation, centrality ranking
+  nlp_engine.py      — turns typed scenarios into simulation inputs, generates summaries
+  server.py          — serves the API and the frontend
+frontend/
+  index.html, style.css, app.js — the dashboard and map
+  data/city_data.json — our sample city
+tests/
+  test_cascade.py    — tests for the cascade engine
+docs/
+  PITCH_AND_DEMO_GUIDE.md
+  ARCHITECTURE.md
+start.py
 ```
+
+## What we cut for time
+
+We scoped this down from a much bigger idea (originally 7+ infrastructure domains, real city GIS data, full scenario comparison). For the hackathon we kept 3 domains and one procedurally generated sample city, since that was enough to tell a convincing story without spending the whole 36 hours on data ingestion.
